@@ -47,6 +47,14 @@ class BorrowingController extends Controller
         $sortBy = $request->input('sort_by', 'borrowed_at');
         $sortOrder = $request->input('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
+
+        // Handle direct export request
+        if ($request->has('export')) {
+            return Excel::download(
+                new BorrowingsExport(), 
+                'borrowings_' . date('Y-m-d_His') . '.xlsx'
+            );
+        }
         
         $borrowings = $query->paginate(10);
         $books = Book::where('is_available', true)->get(); // For the filter dropdown

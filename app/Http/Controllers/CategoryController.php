@@ -32,6 +32,14 @@ class CategoryController extends Controller
         $sortBy = $request->input('sort_by', 'name');
         $sortOrder = $request->input('sort_order', 'asc');
         $query->orderBy($sortBy, $sortOrder);
+
+        // Handle direct export request
+        if ($request->has('export')) {
+            return Excel::download(
+                new CategoriesExport(), 
+                'categories_' . date('Y-m-d_His') . '.xlsx'
+            );
+        }
         
         $categories = $query->paginate(10);
         

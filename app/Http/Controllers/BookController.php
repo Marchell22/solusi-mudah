@@ -41,6 +41,14 @@ class BookController extends Controller
         $sortOrder = $request->input('sort_order', 'asc');
         $query->orderBy($sortBy, $sortOrder);
         
+        // Handle direct export request
+        if ($request->has('export')) {
+            return Excel::download(
+                new BooksExport(), 
+                'books_' . date('Y-m-d_His') . '.xlsx'
+            );
+        }
+        
         $books = $query->paginate(10);
         $categories = Category::all(); // For the filter dropdown
         

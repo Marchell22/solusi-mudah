@@ -38,4 +38,15 @@ Route::middleware(['auth'])->group(function () {
 
     // Resource routes for borrowings
     Route::resource('borrowings', BorrowingController::class);
+
+     // Export
+    Route::get('/excel/export/{type}', [ExcelController::class, 'showExportForm'])->name('excel.export.form');
+    Route::post('/excel/export/{type}', [ExcelController::class, 'export'])->name('excel.export');
+    
+    // Import
+    Route::get('/excel/import/{type}', [ExcelController::class, 'showImportForm'])->name('excel.import.form');
+    Route::post('/excel/import/{type}', [ExcelController::class, 'import'])->name('excel.import');
+    
+    // Template
+    Route::get('/excel/template/{type}', [ExcelController::class, 'downloadTemplate'])->name('excel.template');
 });
