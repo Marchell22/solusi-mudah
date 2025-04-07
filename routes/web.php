@@ -4,6 +4,9 @@
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\BookController;
+use App\Http\Controllers\BorrowingController;
 use Illuminate\Support\Facades\Route;
 
 // Public landing page
@@ -26,4 +29,13 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:Administrator'])->group(function () {
         Route::resource('users', UserController::class);
     });
+    
+    // Resource routes for categories
+    Route::resource('categories', CategoryController::class);
+
+    // Resource routes for books
+    Route::resource('books', BookController::class);
+
+    // Resource routes for borrowings
+    Route::resource('borrowings', BorrowingController::class);
 });
