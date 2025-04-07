@@ -1,3 +1,4 @@
+<!-- resources/views/borrowings/show.blade.php -->
 <x-app-layout>
     <x-slot:header>
         <h2 class="font-semibold text-xl text-gray-800">
@@ -92,7 +93,14 @@
 
                         <div>
                             <h3 class="text-base font-medium text-gray-900 mb-2">Book Information</h3>
-                            <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="text-sm font-medium text-gray-600">Original Book Data:</h4>
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        Reference
+                                    </span>
+                                </div>
+                                
                                 <div class="mb-4">
                                     <p class="text-sm text-gray-600">Title:</p>
                                     <p class="font-medium text-gray-900">
@@ -125,17 +133,52 @@
                                         </span>
                                     </p>
                                 </div>
-                                @if($borrowing->book->cover_path)
-                                <div class="mt-4">
-                                    <a href="{{ Storage::url($borrowing->book->cover_path) }}" target="_blank" class="text-indigo-600 hover:text-indigo-900 flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                        </svg>
-                                        View Book Cover
-                                    </a>
+                            </div>
+
+                            <!-- Bagian Immutable Data yang Disimpan saat Peminjaman -->
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="text-sm font-medium text-gray-600">Book Data at Time of Borrowing:</h4>
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        Immutable
+                                    </span>
                                 </div>
+                                
+                                <div class="mb-4">
+                                    <p class="text-sm text-gray-600">Title:</p>
+                                    <p class="font-medium text-gray-900">{{ $borrowing->book_title ?: 'N/A' }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <p class="text-sm text-gray-600">Author:</p>
+                                    <p class="font-medium text-gray-900">{{ $borrowing->book_author ?: 'N/A' }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <p class="text-sm text-gray-600">Category:</p>
+                                    <p class="font-medium text-gray-900">{{ $borrowing->book_category_name ?: 'N/A' }}</p>
+                                </div>
+                                
+                                <!-- Notifikasi jika ada perubahan pada data buku sejak peminjaman -->
+                                @if(
+                                    ($borrowing->book_title && $borrowing->book_title !== $borrowing->book->title) ||
+                                    ($borrowing->book_author && $borrowing->book_author !== $borrowing->book->author) ||
+                                    ($borrowing->book_category_name && $borrowing->book_category_name !== $borrowing->book->category->name)
+                                )
+                                    <div class="mt-4 p-2 bg-yellow-50 border border-yellow-300 rounded text-yellow-800 text-sm">
+                                        <p class="font-medium">Book information has changed since this borrowing was created.</p>
+                                    </div>
                                 @endif
                             </div>
+
+                            @if($borrowing->book->cover_path)
+                            <div class="mt-4">
+                                <a href="{{ Storage::url($borrowing->book->cover_path) }}" target="_blank" class="text-indigo-600 hover:text-indigo-900 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    </svg>
+                                    View Book Cover
+                                </a>
+                            </div>
+                            @endif
                         </div>
                     </div>
 
@@ -144,6 +187,9 @@
                             {{ __('Back to Borrowings') }}
                         </a>
                     </div>
+
+                    <!-- Audit Trail Component -->
+                    <x-audit-trail :model="$borrowing" />
                 </div>
             </div>
         </div>

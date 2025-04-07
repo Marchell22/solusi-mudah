@@ -1,5 +1,5 @@
 <?php
-
+// app/Http/Controllers/BorrowingController.php
 namespace App\Http\Controllers;
 
 use App\Models\Borrowing;
@@ -20,7 +20,9 @@ class BorrowingController extends Controller
         if ($request->has('search')) {
             $searchTerm = $request->input('search');
             $query->where('borrower_name', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('borrower_email', 'LIKE', "%{$searchTerm}%");
+                  ->orWhere('borrower_email', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('book_title', 'LIKE', "%{$searchTerm}%") // Pencarian pada field immutable
+                  ->orWhere('book_author', 'LIKE', "%{$searchTerm}%"); // Pencarian pada field immutable
         }
         
         // Filter by status
@@ -81,7 +83,8 @@ class BorrowingController extends Controller
         $validated['is_returned'] = false;
 
         // Create borrowing record
-        Borrowing::create($validated);
+        // Immutable data akan disimpan otomatis oleh model observer/boot method
+        $borrowing = Borrowing::create($validated);
 
         // Update book stock
         $book = Book::find($validated['book_id']);
@@ -101,7 +104,15 @@ class BorrowingController extends Controller
     public function show(Borrowing $borrowing)
     {
         // Load related book
-        $borrowing->load('book');
+        $borrowing->load('book.category');
+        
+        // Jika data immutable belum ada (migrasi baru), isi dengan data yang ada saat ini
+        if (!$borrowing->book_title && $borrowing->book) {
+            $borrowing->book_title = $borrowing->book->title;
+            $borrowing->book_author = $borrowing->book->author;
+            $borrowing->book_category_name = $borrowing->book->category->name ?? 'N/A';
+            $borrowing->save();
+        }
         
         return view('borrowings.show', compact('borrowing'));
     }
@@ -136,6 +147,16 @@ class BorrowingController extends Controller
         $newBookId = $validated['book_id'];
         $wasReturned = $borrowing->is_returned;
         $isReturned = $validated['is_returned'] ?? false;
+
+        // Jika buku berubah, perbarui data immutable
+        if ($oldBookId != $newBookId) {
+            $book = Book::find($newBookId);
+            if ($book) {
+                $validated['book_title'] = $book->title;
+                $validated['book_author'] = $book->author;
+                $validated['book_category_name'] = $book->category ? $book->category->name : null;
+            }
+        }
 
         // Update borrowing record
         $borrowing->update($validated);

@@ -155,6 +155,7 @@
                             {{ __('Back to Books') }}
                         </a>
                     </div>
+                    <x-audit-trail :model="$book" />
                 </div>
             </div>
         </div>

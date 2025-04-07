@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Book extends Model
 {
-    use HasFactory, SoftDeletes, HasUuids;
+    use HasFactory, SoftDeletes, HasUuids, Auditable;
 
     protected $fillable = [
         'title', 'author', 'description', 'category_id', 

@@ -122,6 +122,7 @@
                             {{ __('Back to Categories') }}
                         </a>
                     </div>
+                    <x-audit-trail :model="$category" />
                 </div>
             </div>
         </div>
